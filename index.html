@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris Web Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Tetris</h1>
+    <div id="main-container">
+        <div id="playfield-container">
+            <canvas id="tetris" width="240" height="400"></canvas>
+            <div id="playerNameDisplay"></div>
+            <div id="score">Score: 0</div>
+            <button id="pauseBtn">Pause</button>
+            <button id="endGameBtn">End Game</button>
+            <div id="instructions">
+                <p>Controls:</p>
+                <ul>
+                    <li>Left/Right Arrow: Move</li>
+                    <li>Up Arrow: Rotate</li>
+                    <li>Down Arrow: Soft Drop</li>
+                    <li>Space: Hard Drop</li>
+                    <li>P: Pause/Resume</li>
+                    <li>Esc: End Game</li>
+                </ul>
+            </div>
+        </div>
+        <div id="leaderboard-container">
+            <div id="player-setup">
+                <label for="playerName">Player Name:</label>
+                <input type="text" id="playerName" maxlength="12" placeholder="Enter name" />
+                <label for="difficulty">Difficulty:</label>
+                <select id="difficulty">
+                    <option value="easy">Easy</option>
+                    <option value="normal" selected>Normal</option>
+                    <option value="hard">Hard</option>
+                </select>
+                <button id="startBtn">Start Game</button>
+            </div>
+            <div id="leaderboard">
+                <h2>Leaderboard</h2>
+                <ol id="leaderboardList"></ol>
+                <button id="resetLeaderboard">Reset Leaderboard</button>
+            </div>
+        </div>
+    </div>
+    <script src="tetris.js"></script>
+</body>
+</html>
