@@ -18,3 +18,4 @@ This is a simple web-based Tetris game built with HTML, CSS, and JavaScript.
 - Space: Hard Drop
 
 Enjoy playing Tetris!
+# TetrisGhost
