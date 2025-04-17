@@ -11,6 +11,19 @@
     <div id="main-container">
         <div id="playfield-container">
             <canvas id="tetris" width="240" height="400"></canvas>
+            <div id="touch-controls" style="display:none;">
+                <div class="touch-group" id="touch-group-left">
+                    <button id="touch-rotate">🔄</button>
+                    <button id="touch-drop">⏬</button>
+                </div>
+                <div class="touch-group" id="touch-group-right">
+                    <div class="touch-move-row">
+                        <button id="touch-left">◀️</button>
+                        <button id="touch-right">▶️</button>
+                    </div>
+                    <button id="touch-down">⬇️</button>
+                </div>
+            </div>
             <div id="playerNameDisplay"></div>
             <div id="score">Score: 0</div>
             <button id="pauseBtn">Pause</button>
@@ -25,19 +38,6 @@
                     <li>P: Pause/Resume</li>
                     <li>Esc: End Game</li>
                 </ul>
-            </div>
-        </div>
-        <div id="touch-controls" style="display:none;">
-            <div class="touch-group" id="touch-group-left">
-                <button id="touch-rotate">🔄</button>
-                <button id="touch-drop">⏬</button>
-            </div>
-            <div class="touch-group" id="touch-group-right">
-                <div class="touch-move-row">
-                    <button id="touch-left">◀️</button>
-                    <button id="touch-right">▶️</button>
-                </div>
-                <button id="touch-down">⬇️</button>
             </div>
         </div>
         <div id="leaderboard-container">
