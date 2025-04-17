@@ -264,25 +264,21 @@ function drawMatrix(matrix, offset, styleOverride) {
     });
 }
 
-function getShadowPosition(matrix, pos) {
-    let shadowY = pos.y;
-    while (!collide(arena, {matrix, pos: {x: pos.x, y: shadowY + 1}})) {
-        shadowY++;
-    }
-    return {x: pos.x, y: shadowY};
-}
-
 function draw() {
-    // Use the same colorful gradient as the CSS for the playfield background
-    const grad = context.createLinearGradient(0, 0, canvas.width, canvas.height);
-    grad.addColorStop(0, '#2b5876');
-    grad.addColorStop(0.4, '#4e4376');
-    grad.addColorStop(1, '#ff9966');
-    context.fillStyle = grad;
-    context.fillRect(0, 0, canvas.width, canvas.height);
-    // Draw grid
+    // Draw a colorful grid background with squares matching block size
+    for (let y = 0; y < arenaHeight; y++) {
+        for (let x = 0; x < arenaWidth; x++) {
+            // Alternate colors for a more colorful look
+            const colorIdx = ((x + y) % (colors.length - 1)) + 1;
+            context.fillStyle = colors[colorIdx];
+            context.globalAlpha = 0.18 + 0.07 * ((x + y) % 2); // subtle variation
+            context.fillRect(x, y, 1, 1);
+        }
+    }
+    context.globalAlpha = 1;
+    // Draw grid lines
     context.save();
-    context.strokeStyle = 'rgba(255,255,255,0.08)';
+    context.strokeStyle = 'rgba(255,255,255,0.10)';
     for (let x = 1; x < arenaWidth; x++) {
         context.beginPath();
         context.moveTo(x, 0);
@@ -298,12 +294,9 @@ function draw() {
     context.restore();
     // Draw arena
     drawMatrix(arena, {x:0, y:0});
-    // Draw shadow of the falling piece
-    const shadowPos = getShadowPosition(player.matrix, player.pos);
-    drawMatrix(player.matrix, shadowPos, 'rgba(255,255,255,0.25)');
-    // Draw player piece
+    // Draw player piece (no shadow)
     drawMatrix(player.matrix, player.pos);
-    // Glossy overlay
+    // Glossy overlay (optional, can be removed for a more flat look)
     context.save();
     let gradOverlay = context.createLinearGradient(0, 0, 0, canvas.height);
     gradOverlay.addColorStop(0, 'rgba(255,255,255,0.10)');
