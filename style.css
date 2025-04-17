@@ -108,6 +108,76 @@ select#difficulty {
     flex-direction: column;
     align-items: center;
 }
+#touch-controls {
+    display: flex;
+    justify-content: center;
+    gap: 0.5em;
+    margin: 1em 0;
+}
+#touch-controls button {
+    font-size: 2em;
+    padding: 0.3em 0.7em;
+    border-radius: 50%;
+    border: none;
+    background: #ffe138;
+    color: #222;
+    box-shadow: 0 2px 6px #0004;
+    margin: 0 0.2em;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+#touch-controls button:active {
+    background: #ff8e0d;
+}
+#showLeaderboardBtn {
+    margin: 1em auto;
+    background: #ffe138;
+    color: #222;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5em 1.2em;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 6px #0004;
+    transition: background 0.2s;
+}
+#showLeaderboardBtn:hover {
+    background: #ff8e0d;
+}
+#leaderboard-modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+#leaderboard {
+    background: #222;
+    border-radius: 12px;
+    padding: 2em 2em 1em 2em;
+    box-shadow: 0 0 16px #000;
+    min-width: 220px;
+    max-width: 320px;
+}
+#closeLeaderboard {
+    margin-top: 1em;
+    background: #ffe138;
+    color: #222;
+    border: none;
+    border-radius: 4px;
+    padding: 0.5em 1.2em;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 6px #0004;
+    transition: background 0.2s;
+}
+#closeLeaderboard:hover {
+    background: #ff8e0d;
+}
 @media (max-width: 800px) {
     #main-container {
         flex-direction: column;
@@ -120,5 +190,8 @@ select#difficulty {
     #leaderboard-container {
         max-width: 90vw;
         min-width: unset;
+    }
+    #touch-controls {
+        display: flex !important;
     }
 }

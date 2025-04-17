@@ -50,14 +50,59 @@ const dropIntervals = {
     hard: 400
 };
 
-function loadLeaderboard() {
-    const data = localStorage.getItem(leaderboardKey);
-    leaderboard = data ? JSON.parse(data) : [];
-    updateLeaderboardUI();
+// --- Touch Controls ---
+function showTouchControlsIfNeeded() {
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouch || window.innerWidth < 800) {
+        document.getElementById('touch-controls').style.display = 'flex';
+    } else {
+        document.getElementById('touch-controls').style.display = 'none';
+    }
 }
+window.addEventListener('resize', showTouchControlsIfNeeded);
+window.addEventListener('DOMContentLoaded', showTouchControlsIfNeeded);
 
-function saveLeaderboard() {
-    localStorage.setItem(leaderboardKey, JSON.stringify(leaderboard));
+function touchControlHandler(action) {
+    if (!isGameActive || isPaused) return;
+    if (action === 'left') playerMove(-1);
+    if (action === 'right') playerMove(1);
+    if (action === 'rotate') playerRotate(1);
+    if (action === 'down') playerDrop();
+    if (action === 'drop') {
+        while (!collide(arena, player)) player.pos.y++;
+        player.pos.y--;
+        merge(arena, player);
+        playerReset();
+        arenaSweep();
+        updateScore();
+        dropCounter = 0;
+    }
+}
+document.getElementById('touch-left').addEventListener('touchstart', e => { e.preventDefault(); touchControlHandler('left'); });
+document.getElementById('touch-right').addEventListener('touchstart', e => { e.preventDefault(); touchControlHandler('right'); });
+document.getElementById('touch-rotate').addEventListener('touchstart', e => { e.preventDefault(); touchControlHandler('rotate'); });
+document.getElementById('touch-down').addEventListener('touchstart', e => { e.preventDefault(); touchControlHandler('down'); });
+document.getElementById('touch-drop').addEventListener('touchstart', e => { e.preventDefault(); touchControlHandler('drop'); });
+
+// --- Leaderboard Modal ---
+function showLeaderboardModal() {
+    setPause(true);
+    document.getElementById('leaderboard-modal').style.display = 'flex';
+}
+function hideLeaderboardModal() {
+    document.getElementById('leaderboard-modal').style.display = 'none';
+    setPause(false);
+}
+document.getElementById('showLeaderboardBtn').onclick = showLeaderboardModal;
+document.getElementById('closeLeaderboard').onclick = hideLeaderboardModal;
+
+function fetchLeaderboard() {
+    fetch('https://your-leaderboard-api.example.com/leaderboard')
+        .then(res => res.json())
+        .then(data => {
+            leaderboard = data;
+            updateLeaderboardUI();
+        });
 }
 
 function updateLeaderboardUI() {
@@ -69,12 +114,6 @@ function updateLeaderboardUI() {
         list.appendChild(li);
     });
 }
-
-document.getElementById('resetLeaderboard').onclick = () => {
-    leaderboard = [];
-    saveLeaderboard();
-    updateLeaderboardUI();
-};
 
 document.getElementById('startBtn').onclick = () => {
     const nameInput = document.getElementById('playerName');
@@ -102,14 +141,18 @@ document.getElementById('startBtn').onclick = () => {
 document.getElementById('endGameBtn').onclick = () => {
     if (document.getElementById('pauseBtn').disabled) return;
     endGame();
+    showLeaderboardModal();
 };
 
 function endGame() {
     isGameActive = false;
-    leaderboard.push({ name: playerName, score });
-    leaderboard.sort((a, b) => b.score - a.score);
-    saveLeaderboard();
-    updateLeaderboardUI();
+    fetch('https://your-leaderboard-api.example.com/leaderboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: playerName, score })
+    })
+    .then(() => fetchLeaderboard())
+    .catch(() => fetchLeaderboard());
     document.getElementById('player-setup').style.display = '';
     document.getElementById('playerNameDisplay').style.display = 'none';
     document.getElementById('pauseBtn').disabled = true;
@@ -406,9 +449,10 @@ document.addEventListener('keydown', event => {
 });
 
 window.onload = () => {
-    loadLeaderboard();
+    fetchLeaderboard();
     document.getElementById('player-setup').style.display = '';
     document.getElementById('playerNameDisplay').style.display = 'none';
     document.getElementById('pauseBtn').disabled = true;
     document.getElementById('score').innerText = 'Score: 0';
+    showTouchControlsIfNeeded();
 };

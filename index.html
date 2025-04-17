@@ -26,6 +26,13 @@
                     <li>Esc: End Game</li>
                 </ul>
             </div>
+            <div id="touch-controls" style="display:none;">
+                <button id="touch-left">◀️</button>
+                <button id="touch-rotate">🔄</button>
+                <button id="touch-right">▶️</button>
+                <button id="touch-down">⬇️</button>
+                <button id="touch-drop">⏬</button>
+            </div>
         </div>
         <div id="leaderboard-container">
             <div id="player-setup">
@@ -39,10 +46,13 @@
                 </select>
                 <button id="startBtn">Start Game</button>
             </div>
-            <div id="leaderboard">
-                <h2>Leaderboard</h2>
-                <ol id="leaderboardList"></ol>
-                <button id="resetLeaderboard">Reset Leaderboard</button>
+            <button id="showLeaderboardBtn">Show Leaderboard</button>
+            <div id="leaderboard-modal" style="display:none;">
+                <div id="leaderboard">
+                    <h2>Leaderboard</h2>
+                    <ol id="leaderboardList"></ol>
+                    <button id="closeLeaderboard">Close</button>
+                </div>
             </div>
         </div>
     </div>
