@@ -26,12 +26,18 @@
                     <li>Esc: End Game</li>
                 </ul>
             </div>
-            <div id="touch-controls" style="display:none;">
-                <button id="touch-left">◀️</button>
+        </div>
+        <div id="touch-controls" style="display:none;">
+            <div class="touch-group" id="touch-group-left">
                 <button id="touch-rotate">🔄</button>
-                <button id="touch-right">▶️</button>
-                <button id="touch-down">⬇️</button>
                 <button id="touch-drop">⏬</button>
+            </div>
+            <div class="touch-group" id="touch-group-right">
+                <div class="touch-move-row">
+                    <button id="touch-left">◀️</button>
+                    <button id="touch-right">▶️</button>
+                </div>
+                <button id="touch-down">⬇️</button>
             </div>
         </div>
         <div id="leaderboard-container">
