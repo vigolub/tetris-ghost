@@ -2,15 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#222222">
     <title>GHOST Tetris Web Game</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        /* Prevent text selection and zoom on mobile */
+        * {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        input, textarea, select {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+    </style>
 </head>
 <body>
     <h1>GHOST Tetris</h1>
     <div id="main-container">
         <div id="playfield-container">
-            <canvas id="tetris" width="240" height="400"></canvas>
+            <div class="game-displays">
+                <div class="side-pieces">
+                    <div id="hold-piece-container">
+                        <div class="info-label">HOLD</div>
+                        <!-- Canvas will be created dynamically -->
+                    </div>
+                    <div id="next-piece-container">
+                        <div class="info-label">NEXT</div>
+                        <!-- Canvas will be created dynamically -->
+                    </div>
+                </div>
+                <canvas id="tetris" width="240" height="400"></canvas>
+            </div>
             <div id="touch-controls" style="display:none;">
                 <div class="touch-group" id="touch-group-left">
                     <button id="touch-rotate">🔄</button>
@@ -25,19 +61,19 @@
                 </div>
             </div>
             <div id="playerNameDisplay"></div>
-            <div id="score">Score: 0</div>
-            <button id="pauseBtn">Pause</button>
-            <button id="endGameBtn">End Game</button>
-            <div id="instructions">
-                <p>Controls:</p>
-                <ul>
-                    <li>Left/Right Arrow: Move</li>
-                    <li>Up Arrow: Rotate</li>
-                    <li>Down Arrow: Soft Drop</li>
-                    <li>Space: Hard Drop</li>
-                    <li>P: Pause/Resume</li>
-                    <li>Esc: End Game</li>
-                </ul>
+            <div class="game-stats">
+                <div id="score">Score: 0</div>
+                <div id="level">Level: 1</div>
+                <div id="lines">Lines: 0</div>
+            </div>
+            <div class="game-controls">
+                <button id="pauseBtn">Pause</button>
+                <button id="endGameBtn">End Game</button>
+                <button id="muteBtn" onclick="toggleMute()">🔊</button>
+                <button id="holdBtn">Hold (C)</button>
+            </div>
+            <div id="instructions" class="compact-instructions">
+                <p>Controls: ←→: Move • ↑: Rotate • ↓: Soft Drop • Space: Hard Drop • C: Hold • P: Pause • Esc: End</p>
             </div>
         </div>
         <div id="leaderboard-container">
@@ -63,5 +99,7 @@
         </div>
     </div>
     <script src="tetris.js"></script>
+    <script src="animations.js"></script>
+    <script src="statistics.js"></script>
 </body>
 </html>
