@@ -492,17 +492,34 @@ function updateLeaderboardUI() {
 }
 
 document.getElementById('startBtn').onclick = () => {
-    const nameInput = document.getElementById('playerName');
-    const diffSelect = document.getElementById('difficulty');
-    playerName = nameInput.value.trim();
-    if (!playerName) {
-        alert('Please enter your name to start the game.');
-        nameInput.focus();
+    console.log('Start button clicked!');
+    try {
+        const nameInput = document.getElementById('playerName');
+        const diffSelect = document.getElementById('difficulty');
+        
+        if (!nameInput || !diffSelect) {
+            console.error('Required form elements not found:', {nameInput, diffSelect});
+            alert('Game setup error - please refresh the page.');
+            return;
+        }
+        
+        playerName = nameInput.value.trim();
+        console.log('Player name:', playerName);
+        
+        if (!playerName) {
+            alert('Please enter your name to start the game.');
+            nameInput.focus();
+            return;
+        }
+    } catch (error) {
+        console.error('Error in start button handler:', error);
+        alert('Game initialization error - please refresh the page.');
         return;
     }
     
     // Mobile optimizations on game start
     if (isMobileDevice) {
+        console.log('Applying mobile optimizations...');
         // Hide address bar on mobile
         setTimeout(() => {
             window.scrollTo(0, 1);
@@ -517,39 +534,62 @@ document.getElementById('startBtn').onclick = () => {
     }
     
     // Ensure controls are visible before starting the game
+    console.log('Ensuring controls are visible...');
     ensureControlsVisible();
     
     // Force canvas re-initialization to ensure they're visible
+    console.log('Initializing canvases...');
     debugLog('Starting game - reinitializing canvases');
     if (!initCanvases()) {
+        console.error('Failed to initialize canvases on game start - retrying once');
         debugLog('Failed to initialize canvases on game start - retrying once');
         setTimeout(() => {
-            initCanvases();
+            if (!initCanvases()) {
+                alert('Canvas initialization failed. Please refresh the page.');
+            }
         }, 100);
+        return;
     }
     
-    difficulty = diffSelect.value;
-    dropInterval = dropIntervals[difficulty];
-    score = 0;
-    level = 1;
-    linesCleared = 0;
-    document.getElementById('level').textContent = `Level: ${level}`;
-    updateScore();
-    playerReset();
-    setGameState(GameState.PLAYING);
-    document.getElementById('player-setup').style.display = 'none';
-    document.getElementById('playerNameDisplay').textContent = `Player: ${playerName}`;
-    document.getElementById('playerNameDisplay').style.display = '';
-    document.getElementById('pauseBtn').disabled = false;
-    
-    // Mobile-specific adjustments
-    resizeGameCanvas();
-    showTouchControlsIfNeeded();
-    
-    // Ensure controls remain visible after game state change
-    setTimeout(ensureControlsVisible, 100);
-    
-    update(); // Start the game loop only after game is started
+    console.log('Setting up game state...');
+    try {
+        // Validate main canvas is ready
+        if (!canvas || !context) {
+            console.error('Main canvas or context not available:', {canvas, context});
+            alert('Game canvas not ready. Please refresh the page.');
+            return;
+        }
+        
+        difficulty = diffSelect.value;
+        dropInterval = dropIntervals[difficulty];
+        score = 0;
+        level = 1;
+        linesCleared = 0;
+        document.getElementById('level').textContent = `Level: ${level}`;
+        updateScore();
+        playerReset();
+        setGameState(GameState.PLAYING);
+        
+        console.log('Hiding player setup and showing game...');
+        document.getElementById('player-setup').style.display = 'none';
+        document.getElementById('leaderboard-container').style.display = 'none';
+        document.getElementById('playerNameDisplay').textContent = `Player: ${playerName}`;
+        document.getElementById('playerNameDisplay').style.display = '';
+        document.getElementById('pauseBtn').disabled = false;
+        
+        // Mobile-specific adjustments
+        resizeGameCanvas();
+        showTouchControlsIfNeeded();
+        
+        // Ensure controls remain visible after game state change
+        setTimeout(ensureControlsVisible, 100);
+        
+        console.log('Starting game loop...');
+        update(); // Start the game loop only after game is started
+    } catch (error) {
+        console.error('Error setting up game:', error);
+        alert('Game setup error - please refresh the page.');
+    }
 };
 
 document.getElementById('endGameBtn').onclick = () => {
