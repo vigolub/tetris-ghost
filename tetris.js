@@ -37,9 +37,42 @@ function ensureControlsVisible() {
     debugLog('Game controls visibility ensured');
 }
 
+// Main canvas initialization
+function initMainCanvas() {
+    debugLog('Initializing main canvas');
+    try {
+        const mainCanvas = document.getElementById('tetris');
+        if (!mainCanvas) {
+            console.error('Main tetris canvas not found in DOM');
+            return false;
+        }
+        
+        const mainContext = mainCanvas.getContext('2d');
+        if (!mainContext) {
+            console.error('Failed to get 2D context from tetris canvas');
+            return false;
+        }
+        
+        // Set the scale for the main context
+        mainContext.scale(20, 20);
+        debugLog('Main canvas initialized successfully');
+        return true;
+    } catch (error) {
+        console.error('Error initializing main canvas:', error);
+        return false;
+    }
+}
+
 const canvas = document.getElementById('tetris');
-const context = canvas.getContext('2d');
-context.scale(20, 20);
+if (!canvas) {
+    console.error('Main tetris canvas not found in DOM');
+}
+const context = canvas ? canvas.getContext('2d') : null;
+if (context) {
+    context.scale(20, 20);
+} else {
+    console.error('Failed to get 2D context from tetris canvas');
+}
 
 // Canvas references for next and hold pieces
 let nextCanvas, nextContext, nextScale;
@@ -540,6 +573,15 @@ document.getElementById('startBtn').onclick = () => {
     // Force canvas re-initialization to ensure they're visible
     console.log('Initializing canvases...');
     debugLog('Starting game - reinitializing canvases');
+    
+    // Initialize main canvas first
+    if (!initMainCanvas()) {
+        console.error('Failed to initialize main canvas');
+        alert('Main game canvas failed to initialize. Please refresh the page.');
+        return;
+    }
+    
+    // Then initialize side piece canvases
     if (!initCanvases()) {
         console.error('Failed to initialize canvases on game start - retrying once');
         debugLog('Failed to initialize canvases on game start - retrying once');
