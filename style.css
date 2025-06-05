@@ -194,11 +194,7 @@ select#difficulty {
     z-index: 1;
 }
 #touch-controls {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 1.5em;
+    display: none; /* Hidden by default, shown on mobile with grid layout */
     margin: 0.5em auto;
     width: 100%;
     max-width: 320px;
@@ -228,37 +224,7 @@ select#difficulty {
     gap: 1em;
     justify-content: center;
 }
-#touch-rotate, #touch-drop, #touch-left, #touch-right, #touch-down {
-    font-size: 1.5em;
-    padding: 0.25em 0.55em;
-    border-radius: 50%;
-    border: none;
-    background: #ffe138;
-    color: #222;
-    box-shadow: 0 2px 6px #0004;
-    margin: 0.15em;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-#touch-rotate:active, #touch-drop:active, #touch-left:active, #touch-right:active, #touch-down:active {
-    background: #ff8e0d;
-}
-#touch-hold {
-    font-size: 1.5em;
-    padding: 0.25em 0.55em;
-    border-radius: 50%;
-    border: none;
-    background: #ff8e0d;
-    color: #222;
-    box-shadow: 0 2px 6px #0004;
-    margin: 0.15em;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-#touch-hold:active {
-    background: #ffe138;
-}
+/* Removed old touch button styles - now using grid-based touch-btn class */
 #showLeaderboardBtn {
     margin: 0.5em auto;
     background: #ffe138;
@@ -811,14 +777,22 @@ select#difficulty {
         grid-row: 2 !important;
     }
     
-    /* Touch button optimizations */
-    #touch-controls .touch-btn {
+    /* Touch button optimizations - override any conflicting styles */
+    #touch-controls .touch-btn,
+    #touch-controls button.touch-btn,
+    #touch-controls #touch-rotate,
+    #touch-controls #touch-left,
+    #touch-controls #touch-right,
+    #touch-controls #touch-drop,
+    #touch-controls #touch-down,
+    #touch-controls #touch-pause {
         width: 100% !important;
         height: 100% !important;
         border-radius: 8px !important;
         font-size: 16px !important;
         font-weight: bold !important;
         margin: 0 !important;
+        padding: 0 !important;
         background: rgba(255, 255, 255, 0.15) !important;
         border: 1px solid rgba(255, 255, 255, 0.3) !important;
         color: white !important;
@@ -827,9 +801,18 @@ select#difficulty {
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
+        cursor: pointer !important;
+        box-shadow: none !important;
     }
     
-    #touch-controls .touch-btn:active {
+    #touch-controls .touch-btn:active,
+    #touch-controls button.touch-btn:active,
+    #touch-controls #touch-rotate:active,
+    #touch-controls #touch-left:active,
+    #touch-controls #touch-right:active,
+    #touch-controls #touch-drop:active,
+    #touch-controls #touch-down:active,
+    #touch-controls #touch-pause:active {
         background: rgba(255, 255, 255, 0.3) !important;
         transform: scale(0.95) !important;
     }
@@ -901,9 +884,14 @@ select#difficulty {
         height: 38px !important;
     }
     
-    #touch-controls .touch-btn {
-        width: 38px !important;
-        height: 28px !important;
+    #touch-controls .touch-btn,
+    #touch-controls button.touch-btn,
+    #touch-controls #touch-rotate,
+    #touch-controls #touch-left,
+    #touch-controls #touch-right,
+    #touch-controls #touch-drop,
+    #touch-controls #touch-down,
+    #touch-controls #touch-pause {
         font-size: 14px !important;
     }
     
@@ -933,7 +921,38 @@ select#difficulty {
     #touch-controls {
         height: 60px !important;
         grid-template-rows: 1fr !important;
-        grid-template-columns: repeat(6, 1fr) !important;
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr !important;
+    }
+    
+    /* Rearrange buttons for landscape - single row */
+    #touch-rotate {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+    }
+    
+    #touch-left {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+    }
+    
+    #touch-right {
+        grid-column: 3 !important;
+        grid-row: 1 !important;
+    }
+    
+    #touch-down {
+        grid-column: 4 !important;
+        grid-row: 1 !important;
+    }
+    
+    #touch-drop {
+        grid-column: 5 !important;
+        grid-row: 1 !important;
+    }
+    
+    #touch-pause {
+        grid-column: 6 !important;
+        grid-row: 1 !important;
     }
     
     /* Landscape specific adjustments */
