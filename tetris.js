@@ -201,20 +201,101 @@ const dropIntervals = {
     hard: 400
 };
 
-// --- Touch Controls ---
-function showTouchControlsIfNeeded() {
-    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    if (isTouch || window.innerWidth < 800) {
-        document.getElementById('touch-controls').style.display = 'flex';
+// --- Mobile & Touch Controls ---
+let isMobileDevice = false;
+let touchStartX = 0;
+let touchStartY = 0;
+let touchStartTime = 0;
+let lastTouchTime = 0;
+let isDoubleTouch = false;
+
+// Mobile detection and setup
+function detectMobile() {
+    isMobileDevice = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                     window.innerWidth <= 430 || 
+                     ('ontouchstart' in window) || 
+                     (navigator.maxTouchPoints > 0);
+    return isMobileDevice;
+}
+
+// Dynamic canvas scaling for mobile
+function resizeGameCanvas() {
+    if (!canvas) return;
+    
+    const container = document.getElementById('playfield-container');
+    if (!container) return;
+    
+    if (isMobileDevice || window.innerWidth <= 430) {
+        // Mobile optimized sizing
+        const viewportWidth = Math.min(window.innerWidth * 0.9, 320);
+        const viewportHeight = Math.min(window.innerHeight * 0.5, 400);
+        
+        // Maintain aspect ratio
+        const aspectRatio = 240 / 400; // Original canvas ratio
+        let newWidth = viewportWidth;
+        let newHeight = newWidth / aspectRatio;
+        
+        if (newHeight > viewportHeight) {
+            newHeight = viewportHeight;
+            newWidth = newHeight * aspectRatio;
+        }
+        
+        canvas.style.width = `${newWidth}px`;
+        canvas.style.height = `${newHeight}px`;
+        canvas.style.maxWidth = '300px';
+        canvas.style.maxHeight = '400px';
+        
+        debugLog(`Canvas resized for mobile: ${newWidth}x${newHeight}`);
     } else {
-        document.getElementById('touch-controls').style.display = 'none';
+        // Desktop sizing
+        canvas.style.width = '240px';
+        canvas.style.height = '400px';
     }
 }
-window.addEventListener('resize', showTouchControlsIfNeeded);
-window.addEventListener('DOMContentLoaded', showTouchControlsIfNeeded);
 
-function touchControlHandler(action) {
+function showTouchControlsIfNeeded() {
+    const isTouch = detectMobile();
+    const touchControls = document.getElementById('touch-controls');
+    
+    if (isTouch || window.innerWidth < 800) {
+        if (touchControls) {
+            touchControls.style.display = 'grid';
+            touchControls.style.visibility = 'visible';
+        }
+        // Resize canvas for mobile
+        resizeGameCanvas();
+    } else {
+        if (touchControls) {
+            touchControls.style.display = 'none';
+        }
+        resizeGameCanvas();
+    }
+}
+
+// Enhanced touch control handler with feedback
+function touchControlHandler(action, event) {
+    // Visual feedback for touch
+    if (event && event.target) {
+        event.target.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+            event.target.style.transform = 'scale(1)';
+        }, 100);
+    }
+    
+    // Haptic feedback on supported devices
+    if (navigator.vibrate) {
+        navigator.vibrate(50);
+    }
+    
+    // Handle pause action regardless of game state
+    if (action === 'pause') {
+        togglePause();
+        return;
+    }
+    
+    // Other actions only work during gameplay
     if (gameState !== GameState.PLAYING) return;
+    
     if (action === 'left') playerMove(-1);
     if (action === 'right') playerMove(1);
     if (action === 'rotate') playerRotate(1);
@@ -230,11 +311,136 @@ function touchControlHandler(action) {
         dropCounter = 0;
     }
 }
-document.getElementById('touch-left').addEventListener('touchstart', e => { e.preventDefault(); touchControlHandler('left'); });
-document.getElementById('touch-right').addEventListener('touchstart', e => { e.preventDefault(); touchControlHandler('right'); });
-document.getElementById('touch-rotate').addEventListener('touchstart', e => { e.preventDefault(); touchControlHandler('rotate'); });
-document.getElementById('touch-down').addEventListener('touchstart', e => { e.preventDefault(); touchControlHandler('down'); });
-document.getElementById('touch-drop').addEventListener('touchstart', e => { e.preventDefault(); touchControlHandler('drop'); });
+
+// Gesture-based controls on canvas
+function setupCanvasGestures() {
+    if (!canvas) return;
+    
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+}
+
+function handleTouchStart(e) {
+    e.preventDefault();
+    
+    if (gameState !== GameState.PLAYING) return;
+    
+    const touch = e.touches[0];
+    touchStartX = touch.clientX;
+    touchStartY = touch.clientY;
+    touchStartTime = Date.now();
+    
+    // Double tap detection
+    const timeSinceLastTouch = touchStartTime - lastTouchTime;
+    if (timeSinceLastTouch < 300) {
+        isDoubleTouch = true;
+        // Double tap = rotate
+        touchControlHandler('rotate');
+    } else {
+        isDoubleTouch = false;
+    }
+    lastTouchTime = touchStartTime;
+}
+
+function handleTouchMove(e) {
+    e.preventDefault();
+    // Prevent scrolling while playing
+}
+
+function handleTouchEnd(e) {
+    e.preventDefault();
+    
+    if (gameState !== GameState.PLAYING || isDoubleTouch) return;
+    
+    const touch = e.changedTouches[0];
+    const endX = touch.clientX;
+    const endY = touch.clientY;
+    const endTime = Date.now();
+    
+    const deltaX = endX - touchStartX;
+    const deltaY = endY - touchStartY;
+    const deltaTime = endTime - touchStartTime;
+    
+    const minSwipeDistance = 30;
+    const maxSwipeTime = 500;
+    
+    if (deltaTime > maxSwipeTime) return;
+    
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+    
+    if (absX > minSwipeDistance || absY > minSwipeDistance) {
+        if (absX > absY) {
+            // Horizontal swipe
+            if (deltaX > 0) {
+                touchControlHandler('right');
+            } else {
+                touchControlHandler('left');
+            }
+        } else {
+            // Vertical swipe
+            if (deltaY > 0 && deltaY > minSwipeDistance * 2) {
+                // Long downward swipe = hard drop
+                touchControlHandler('drop');
+            } else if (deltaY > 0) {
+                // Short downward swipe = soft drop
+                touchControlHandler('down');
+            } else {
+                // Upward swipe = rotate
+                touchControlHandler('rotate');
+            }
+        }
+    } else if (deltaTime < 200) {
+        // Quick tap = rotate
+        touchControlHandler('rotate');
+    }
+}
+
+// Touch button event listeners with improved handling
+function setupTouchButtons() {
+    const touchButtons = [
+        { id: 'touch-left', action: 'left' },
+        { id: 'touch-right', action: 'right' },
+        { id: 'touch-rotate', action: 'rotate' },
+        { id: 'touch-down', action: 'down' },
+        { id: 'touch-drop', action: 'drop' },
+        { id: 'touch-pause', action: 'pause' }
+    ];
+    
+    touchButtons.forEach(({ id, action }) => {
+        const button = document.getElementById(id);
+        if (button) {
+            // Remove any existing listeners
+            button.replaceWith(button.cloneNode(true));
+            const newButton = document.getElementById(id);
+            
+            newButton.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                touchControlHandler(action, e);
+            }, { passive: false });
+            
+            // Prevent context menu on long press
+            newButton.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+            });
+        }
+    });
+}
+
+// Window resize handler with mobile optimizations
+window.addEventListener('resize', () => {
+    showTouchControlsIfNeeded();
+    resizeGameCanvas();
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+    detectMobile();
+    showTouchControlsIfNeeded();
+    setupCanvasGestures();
+    setupTouchButtons();
+    resizeGameCanvas();
+});
 
 // --- Leaderboard Modal ---
 function showLeaderboardModal() {
@@ -293,6 +499,21 @@ document.getElementById('startBtn').onclick = () => {
         return;
     }
     
+    // Mobile optimizations on game start
+    if (isMobileDevice) {
+        // Hide address bar on mobile
+        setTimeout(() => {
+            window.scrollTo(0, 1);
+        }, 100);
+        
+        // Prevent screen sleep if available
+        if ('wakeLock' in navigator) {
+            navigator.wakeLock.request('screen').catch(() => {
+                debugLog('Wake lock not available');
+            });
+        }
+    }
+    
     // Ensure controls are visible before starting the game
     ensureControlsVisible();
     
@@ -318,6 +539,10 @@ document.getElementById('startBtn').onclick = () => {
     document.getElementById('playerNameDisplay').textContent = `Player: ${playerName}`;
     document.getElementById('playerNameDisplay').style.display = '';
     document.getElementById('pauseBtn').disabled = false;
+    
+    // Mobile-specific adjustments
+    resizeGameCanvas();
+    showTouchControlsIfNeeded();
     
     // Ensure controls remain visible after game state change
     setTimeout(ensureControlsVisible, 100);
@@ -1174,6 +1399,29 @@ function adjustCanvasSize() {
 window.onload = () => {
     debugLog('Window loaded');
     
+    // Initialize mobile detection first
+    detectMobile();
+    
+    // Set up mobile optimizations
+    if (isMobileDevice) {
+        // Prevent zoom on input focus
+        const metaViewport = document.querySelector('meta[name="viewport"]');
+        if (metaViewport) {
+            metaViewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+        }
+        
+        // Add mobile-specific styles
+        document.body.style.userSelect = 'none';
+        document.body.style.touchAction = 'manipulation';
+        
+        // Optimize canvas for mobile
+        if (canvas) {
+            canvas.style.imageRendering = 'pixelated';
+            canvas.style.imageRendering = '-moz-crisp-edges';
+            canvas.style.imageRendering = 'crisp-edges';
+        }
+    }
+    
     // Initialize global variables
     score = 0;
     level = 1;
@@ -1251,8 +1499,11 @@ window.onload = () => {
         touchControls.appendChild(touchGroupHold);
     }
     
-    // Initialize canvas and touch controls
+    // Initialize canvas and touch controls with mobile support
     showTouchControlsIfNeeded();
+    setupCanvasGestures();
+    setupTouchButtons();
+    resizeGameCanvas();
     initBackgroundPattern();
     adjustCanvasSize();
     
