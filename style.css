@@ -828,9 +828,24 @@ select#difficulty {
         display: none !important;
     }
     
-    /* Mobile leaderboard optimization */
+    /* Mobile leaderboard optimization - hide leaderboard but keep player setup */
+    #leaderboard-container #showLeaderboardBtn,
+    #leaderboard-container #leaderboard-modal {
+        display: none !important; /* Hide leaderboard during gameplay */
+    }
+    
+    /* Keep leaderboard container visible but minimize it */
     #leaderboard-container {
-        display: none !important; /* Hide during gameplay */
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        z-index: 1003 !important;
+        background: rgba(0, 0, 0, 0.8) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
     
     /* Player setup optimization */
