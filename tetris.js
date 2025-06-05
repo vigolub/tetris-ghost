@@ -226,24 +226,26 @@ function resizeGameCanvas() {
     if (!container) return;
     
     if (isMobileDevice || window.innerWidth <= 430) {
-        // Mobile optimized sizing
-        const viewportWidth = Math.min(window.innerWidth * 0.9, 320);
-        const viewportHeight = Math.min(window.innerHeight * 0.5, 400);
+        // Mobile optimized sizing - use more available space
+        const availableWidth = window.innerWidth - 120; // Account for side pieces (80px) + gaps
+        const availableHeight = window.innerHeight - 220; // Account for header, controls, stats
         
-        // Maintain aspect ratio
-        const aspectRatio = 240 / 400; // Original canvas ratio
-        let newWidth = viewportWidth;
+        // Maintain Tetris aspect ratio (3:5 ratio)
+        const aspectRatio = 3 / 5;
+        let newWidth = Math.min(availableWidth, 280);
         let newHeight = newWidth / aspectRatio;
         
-        if (newHeight > viewportHeight) {
-            newHeight = viewportHeight;
+        if (newHeight > availableHeight) {
+            newHeight = availableHeight;
             newWidth = newHeight * aspectRatio;
         }
         
+        // Ensure minimum playable size
+        newWidth = Math.max(newWidth, 180);
+        newHeight = Math.max(newHeight, 300);
+        
         canvas.style.width = `${newWidth}px`;
         canvas.style.height = `${newHeight}px`;
-        canvas.style.maxWidth = '300px';
-        canvas.style.maxHeight = '400px';
         
         debugLog(`Canvas resized for mobile: ${newWidth}x${newHeight}`);
     } else {
